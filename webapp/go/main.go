@@ -967,6 +967,8 @@ func calculateGraphDataPoint(isuConditions []IsuCondition) (GraphDataPoint, erro
 // GET /api/condition/:jia_isu_uuid
 // ISUのコンディションを取得
 func getIsuConditions(c echo.Context) error {
+	//var err error
+	//jiaUserID := "isucon1"
 	jiaUserID, errStatusCode, err := getUserIDFromSession(c)
 	if err != nil {
 		if errStatusCode == http.StatusUnauthorized {
@@ -1006,11 +1008,7 @@ func getIsuConditions(c echo.Context) error {
 		startTime = time.Unix(startTimeInt64, 0)
 	}
 
-	var isuName string
-	err = db.Get(&isuName,
-		"SELECT name FROM `isu` WHERE `jia_isu_uuid` = ? AND `jia_user_id` = ?",
-		jiaIsuUUID, jiaUserID,
-	)
+	isuName, err := getName(err, jiaIsuUUID, jiaUserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.String(http.StatusNotFound, "not found: isu")
@@ -1026,6 +1024,22 @@ func getIsuConditions(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK, conditionsResponse)
+}
+
+var nameCache = sync.Map{}
+
+func getName(err error, jiaIsuUUID string, jiaUserID string) (string, error) {
+	var isuName string
+	if v, ok := nameCache.Load(jiaUserID + jiaIsuUUID); ok {
+		return v.(string), nil
+	}
+
+	err = db.Get(&isuName,
+		"SELECT name FROM `isu` WHERE `jia_isu_uuid` = ? AND `jia_user_id` = ?",
+		jiaIsuUUID, jiaUserID,
+	)
+	nameCache.Store(jiaUserID+jiaIsuUUID, isuName)
+	return isuName, err
 }
 
 // ISUのコンディションをDBから取得
