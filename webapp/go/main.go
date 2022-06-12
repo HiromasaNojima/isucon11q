@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -696,6 +697,8 @@ func getIsuID(c echo.Context) error {
 // GET /api/isu/:jia_isu_uuid/icon
 // ISUのアイコンを取得
 func getIsuIcon(c echo.Context) error {
+	//var err error
+	//jiaUserID := "isucon1"
 	jiaUserID, errStatusCode, err := getUserIDFromSession(c)
 	if err != nil {
 		if errStatusCode == http.StatusUnauthorized {
@@ -709,8 +712,7 @@ func getIsuIcon(c echo.Context) error {
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
 	var image []byte
-	err = db.Get(&image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
-		jiaUserID, jiaIsuUUID)
+	err = getImage(err, &image, jiaUserID, jiaIsuUUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.String(http.StatusNotFound, "not found: isu")
@@ -721,6 +723,24 @@ func getIsuIcon(c echo.Context) error {
 	}
 
 	return c.Blob(http.StatusOK, "", image)
+}
+
+var iconCache = sync.Map{}
+
+func getImage(err error, image *[]byte, jiaUserID string, jiaIsuUUID string) error {
+	if v, ok := iconCache.Load(jiaUserID + jiaIsuUUID); ok {
+		*image = v.([]byte)
+		return nil
+	}
+
+	err = db.Get(image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
+		jiaUserID, jiaIsuUUID)
+	if err != nil {
+		return err
+	}
+
+	iconCache.Store(jiaUserID+jiaIsuUUID, *image)
+	return nil
 }
 
 // GET /api/isu/:jia_isu_uuid/graph
