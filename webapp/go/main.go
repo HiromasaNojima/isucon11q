@@ -247,7 +247,7 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
-	postIsuConditionTargetBaseURL = os.Getenv("POST_ISUCONDITION_TARGET_BASE_URL")
+	postIsuConditionTargetBaseURL = getEnv("POST_ISUCONDITION_TARGET_BASE_URL", "https://isucondition-1.t.isucon.dev")
 	if postIsuConditionTargetBaseURL == "" {
 		e.Logger.Fatalf("missing: POST_ISUCONDITION_TARGET_BASE_URL")
 		return
