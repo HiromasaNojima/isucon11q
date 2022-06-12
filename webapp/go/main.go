@@ -1211,6 +1211,7 @@ func postIsuCondition(c echo.Context) error {
 	} else if len(req) == 0 {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
+
 	tx, err := db.Beginx()
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
@@ -1218,17 +1219,13 @@ func postIsuCondition(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
-	//var count int
-	//err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
-	isuList := []Isu{}
-	err = tx.Get(&isuList, "SELECT jia_isu_uuid FROM `isu` WHERE `jia_isu_uuid` = ? LIMIT 1", jiaIsuUUID)
+	var count int
+	err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
-
-	//if count == 0 {
-	if len(isuList) == 0 {
+	if count == 0 {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
 
