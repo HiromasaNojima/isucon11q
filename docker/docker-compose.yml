@@ -14,5 +14,6 @@ services:
       TZ: "Asia/Tokyo"
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
+      - ./conf/my.cnf:/etc/mysql/conf.d/my.cnf
     ports:
       - "3306:3306"
