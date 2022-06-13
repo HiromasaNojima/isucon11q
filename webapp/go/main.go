@@ -1030,15 +1030,15 @@ var nameCache = sync.Map{}
 
 func getName(err error, jiaIsuUUID string, jiaUserID string) (string, error) {
 	var isuName string
-	if v, ok := nameCache.Load(jiaUserID + jiaIsuUUID); ok {
-		return v.(string), nil
-	}
+	// if v, ok := nameCache.Load(jiaUserID + jiaIsuUUID); ok {
+	// 	return v.(string), nil
+	// }
 
 	err = db.Get(&isuName,
 		"SELECT name FROM `isu` WHERE `jia_isu_uuid` = ? AND `jia_user_id` = ?",
 		jiaIsuUUID, jiaUserID,
 	)
-	nameCache.Store(jiaUserID+jiaIsuUUID, isuName)
+	// nameCache.Store(jiaUserID+jiaIsuUUID, isuName)
 	return isuName, err
 }
 
