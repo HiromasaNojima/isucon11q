@@ -1212,15 +1212,15 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
 
-	//tx, err := db.Beginx()
-	//if err != nil {
-	//	c.Logger().Errorf("db error: %v", err)
-	//	return c.NoContent(http.StatusInternalServerError)
-	//}
-	//defer tx.Rollback()
+	tx, err := db.Beginx()
+	if err != nil {
+		c.Logger().Errorf("db error: %v", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	defer tx.Rollback()
 
 	var count int
-	err = db.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
+	err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -1230,66 +1230,31 @@ func postIsuCondition(c echo.Context) error {
 	}
 
 	for _, cond := range req {
+		timestamp := time.Unix(cond.Timestamp, 0)
+
 		if !isValidConditionFormat(cond.Condition) {
 			return c.String(http.StatusBadRequest, "bad request body")
 		}
-	}
 
-	go createCondition(req, jiaIsuUUID)
-
-	//for _, cond := range req {
-	//	if !isValidConditionFormat(cond.Condition) {
-	//		return c.String(http.StatusBadRequest, "bad request body")
-	//	}
-	//}
-	//	_, err = tx.Exec(
-	//		"INSERT INTO `isu_condition`"+
-	//			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
-	//			"	VALUES (?, ?, ?, ?, ?)",
-	//		jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
-	//	if err != nil {
-	//		c.Logger().Errorf("db error: %v", err)
-	//		return c.NoContent(http.StatusInternalServerError)
-	//	}
-	//
-	//}
-	//
-	//err = tx.Commit()
-	//if err != nil {
-	//	c.Logger().Errorf("db error: %v", err)
-	//	return c.NoContent(http.StatusInternalServerError)
-	//}
-
-	return c.NoContent(http.StatusAccepted)
-}
-
-func createCondition(req []PostIsuConditionRequest, jiaIsuUUID string) {
-	tx, err := db.Beginx()
-	if err != nil {
-		println("db error: %v", err)
-		return
-	}
-	defer tx.Rollback()
-
-	for _, cond := range req {
-		timestamp := time.Unix(cond.Timestamp, 0)
 		_, err = tx.Exec(
 			"INSERT INTO `isu_condition`"+
 				"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
 				"	VALUES (?, ?, ?, ?, ?)",
 			jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
 		if err != nil {
-			println("db error: %v", err)
-			return
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
 		}
 
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		println("db error: %v", err)
+		c.Logger().Errorf("db error: %v", err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
-	return
+
+	return c.NoContent(http.StatusAccepted)
 }
 
 // ISUのコンディションの文字列がcsv形式になっているか検証
