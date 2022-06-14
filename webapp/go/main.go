@@ -10,10 +10,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/exec"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -219,11 +217,6 @@ func init() {
 
 func main() {
 	e := echo.New()
-	runtime.SetBlockProfileRate(1)
-	runtime.SetMutexProfileFraction(1)
-	go func() {
-		log.Fatal(http.ListenAndServe("localhost:6060", nil))
-	}()
 	e.Debug = true
 	e.Logger.SetLevel(log.DEBUG)
 
@@ -1219,12 +1212,12 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request body")
 	}
 
-	tx, err := db.Beginx()
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	defer tx.Rollback()
+	//tx, err := db.Beginx()
+	//if err != nil {
+	//	c.Logger().Errorf("db error: %v", err)
+	//	return c.NoContent(http.StatusInternalServerError)
+	//}
+	//defer tx.Rollback()
 
 	var count int
 	err = db.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
@@ -1242,64 +1235,62 @@ func postIsuCondition(c echo.Context) error {
 		}
 	}
 
-	condtiions := make([]IsuCondition, 0)
-	for _, cond := range req {
-		if !isValidConditionFormat(cond.Condition) {
-			return c.String(http.StatusBadRequest, "bad request body")
-		}
+	go createCondition(req, jiaIsuUUID)
 
-		condtiions = append(condtiions, IsuCondition{
-			JIAIsuUUID: jiaIsuUUID,
-			Timestamp:  time.Unix(cond.Timestamp, 0),
-			IsSitting:  cond.IsSitting,
-			Condition:  cond.Condition,
-			Message:    cond.Message,
-		})
-
-	}
-	_, err = tx.NamedExec("INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES (:jia_isu_uuid, :timestamp , :is_sitting, :condition, :message)", condtiions)
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
+	//for _, cond := range req {
+	//	if !isValidConditionFormat(cond.Condition) {
+	//		return c.String(http.StatusBadRequest, "bad request body")
+	//	}
+	//}
+	//	_, err = tx.Exec(
+	//		"INSERT INTO `isu_condition`"+
+	//			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
+	//			"	VALUES (?, ?, ?, ?, ?)",
+	//		jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
+	//	if err != nil {
+	//		c.Logger().Errorf("db error: %v", err)
+	//		return c.NoContent(http.StatusInternalServerError)
+	//	}
+	//
+	//}
+	//
+	//err = tx.Commit()
+	//if err != nil {
+	//	c.Logger().Errorf("db error: %v", err)
+	//	return c.NoContent(http.StatusInternalServerError)
+	//}
 
 	return c.NoContent(http.StatusAccepted)
 }
 
-//func createCondition(req []PostIsuConditionRequest, jiaIsuUUID string) {
-//	tx, err := db.Beginx()
-//	if err != nil {
-//		println("db error: %v", err)
-//		return
-//	}
-//	defer tx.Rollback()
-//
-//	for _, cond := range req {
-//		timestamp := time.Unix(cond.Timestamp, 0)
-//		_, err = tx.Exec(
-//			"INSERT INTO `isu_condition`"+
-//				"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
-//				"	VALUES (?, ?, ?, ?, ?)",
-//			jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
-//		if err != nil {
-//			println("db error: %v", err)
-//			return
-//		}
-//
-//	}
-//
-//	err = tx.Commit()
-//	if err != nil {
-//		println("db error: %v", err)
-//	}
-//	return
-//}
+func createCondition(req []PostIsuConditionRequest, jiaIsuUUID string) {
+	tx, err := db.Beginx()
+	if err != nil {
+		println("db error: %v", err)
+		return
+	}
+	defer tx.Rollback()
+
+	for _, cond := range req {
+		timestamp := time.Unix(cond.Timestamp, 0)
+		_, err = tx.Exec(
+			"INSERT INTO `isu_condition`"+
+				"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
+				"	VALUES (?, ?, ?, ?, ?)",
+			jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
+		if err != nil {
+			println("db error: %v", err)
+			return
+		}
+
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		println("db error: %v", err)
+	}
+	return
+}
 
 // ISUのコンディションの文字列がcsv形式になっているか検証
 func isValidConditionFormat(conditionStr string) bool {
