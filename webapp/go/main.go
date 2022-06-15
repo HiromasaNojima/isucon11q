@@ -272,6 +272,7 @@ func main() {
 
 	workerSize, _ := strconv.Atoi(os.Getenv("WORKER_THREAD_SIZE"))
 	for i := 0; i < workerSize; i++ {
+		//for i := 0; i < 1; i++ {
 		go worker(queue)
 	}
 	defer close(queue)
@@ -1209,15 +1210,28 @@ func getTrend(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+var count int64
+var pool = make([]IsuCondition, 0)
+
+//var mutex = &sync.Mutex{}
+
 func worker(reqs <-chan []IsuCondition) {
+
 	for req := range reqs {
+		if count < 5 {
+			pool = append(pool, req...)
+			println(pool)
+			count++
+			continue
+		}
+
 		tx, err := db.Beginx()
 		if err != nil {
 			println("db error: %v", err)
 			continue
 		}
 
-		_, err = tx.NamedExec("INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES (:jia_isu_uuid, :timestamp , :is_sitting, :condition, :message)", req)
+		_, err = tx.NamedExec("INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES (:jia_isu_uuid, :timestamp , :is_sitting, :condition, :message)", pool)
 		if err != nil {
 			println("db error: %v", err)
 			continue
@@ -1227,6 +1241,9 @@ func worker(reqs <-chan []IsuCondition) {
 			println("db error: %v", err)
 			continue
 		}
+
+		count = 0
+		pool = make([]IsuCondition, 0)
 	}
 
 }
