@@ -5,3 +5,4 @@ MYSQL_DBNAME=isucondition
 MYSQL_PASS=isucon
 POST_ISUCONDITION_TARGET_BASE_URL="https://isucondition-1.t.isucon.dev"
 WORKER_THREAD_SIZE=10
+PPROF_ON=false

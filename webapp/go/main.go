@@ -12,11 +12,14 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	_ "net/http/pprof"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
@@ -218,6 +221,15 @@ func init() {
 var queue = make(chan []IsuCondition)
 
 func main() {
+	pprofOn, _ := strconv.ParseBool(os.Getenv("PPROF_ON"))
+	if pprofOn {
+		runtime.SetBlockProfileRate(1)
+		runtime.SetMutexProfileFraction(1)
+		go func() {
+			log.Fatal(http.ListenAndServe("0.0.0.0:6060", nil))
+		}()
+	}
+
 	e := echo.New()
 	e.Debug = true
 	e.Logger.SetLevel(log.DEBUG)
