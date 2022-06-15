@@ -258,7 +258,8 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
-	for i := 0; i < 5; i++ {
+	workerSize, _ := strconv.Atoi(os.Getenv("WORKER_THREAD_SIZE"))
+	for i := 0; i < workerSize; i++ {
 		go worker(queue)
 	}
 	defer close(queue)
