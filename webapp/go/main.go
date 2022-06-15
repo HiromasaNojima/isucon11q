@@ -1210,15 +1210,17 @@ func getTrend(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-var count int64
+var count int
 var pool = make([]IsuCondition, 0)
+var bulkPoolingLimit, _ = strconv.Atoi(os.Getenv("WORKER_BULK_POOL_SIZE"))
 
 //var mutex = &sync.Mutex{}
 
 func worker(reqs <-chan []IsuCondition) {
 
 	for req := range reqs {
-		if count < 5 {
+		//if count < 5 {
+		if count < bulkPoolingLimit {
 			pool = append(pool, req...)
 			println(pool)
 			count++
