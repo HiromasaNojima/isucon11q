@@ -1,2 +1,2 @@
 go build -o isucondition main.go
-sudo systemctl restart isucondition.go.service
+systemctl restart isucondition.go.service
