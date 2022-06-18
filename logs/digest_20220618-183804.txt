@@ -1,0 +1,158 @@
+
+# 10.1s user time, 110ms system time, 41.79M rss, 50.90M vsz
+# Current date: Sat Jun 18 18:38:15 2022
+# Hostname: isucon11q
+# Files: /var/log/mysql/mysql-slow.log
+# Overall: 59.40k total, 64 unique, 45.37 QPS, 0.20x concurrency _________
+# Time range: 2022-06-18 18:15:50 to 18:37:39
+# Attribute          total     min     max     avg     95%  stddev  median
+# ============     ======= ======= ======= ======= ======= ======= =======
+# Exec time           259s       0      4s     4ms     7ms    67ms    28us
+# Lock time             3s       0    19ms    56us    80us   399us       0
+# Rows sent         19.37M       0 187.36k  341.98   1.46k   4.03k    0.99
+# Rows examine      39.52M       0 562.16k  697.71   1.46k  12.06k       0
+# Rows affecte     200.07k       0     618    3.45       0   21.67       0
+# Bytes sent         1.90G       0  16.30M  33.58k 158.07k 360.66k   62.76
+# Query size        37.36M       6 790.36k  659.61  192.76   4.65k   84.10
+# Boolean:
+# QC hit        63% yes,  36% no
+
+# Profile
+# Rank Query ID                            Response time  Calls R/Call V/M
+# ==== =================================== ============== ===== ====== ===
+#    1 0x7E41F4A94C0BFD09783D367F71226D62  195.5929 75.5%   358 0.5463  0.86 SELECT isu isu_condition
+#    2 0x262F9751D333E0ED88C2CA4950B08D41   32.8517 12.7%  6266 0.0052  0.01 SELECT isu_condition
+#    3 0xFFFCA4D67EA0A788813031B8BBC3B329   11.9003  4.6%  2863 0.0042  0.01 COMMIT
+#    4 0x306EACB7457A8DA94B1E881668B28B13    9.1275  3.5%  1389 0.0066  0.01 INSERT isu_condition
+# MISC 0xMISC                                9.6743  3.7% 48519 0.0002   0.0 <60 ITEMS>
+
+# Query 1: 5.87 QPS, 3.21x concurrency, ID 0x7E41F4A94C0BFD09783D367F71226D62 at byte 51972309
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.86
+# Time range: 2022-06-18 18:36:37 to 18:37:38
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0     358
+# Exec time     75    196s    60us      4s   546ms      2s   686ms   323ms
+# Lock time      1    52ms       0     6ms   145us   287us   474us    66us
+# Rows sent     53  10.40M     618 187.36k  29.76k 143.37k  42.71k   9.33k
+# Rows examine  77  30.63M       0 562.16k  87.62k 440.37k 129.68k  27.29k
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent    47 931.67M  54.89k  16.30M   2.60M  12.46M   3.72M 830.38k
+# Query size     0  66.78k     191     191     191     191       0     191
+# Boolean:
+# QC hit         8% yes,  91% no
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us  #
+# 100us  #########
+#   1ms  ##
+#  10ms  ###############################
+# 100ms  ################################################################
+#    1s  #####################
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu'\G
+#    SHOW CREATE TABLE `isucondition`.`isu`\G
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC\G
+
+# Query 2: 102.72 QPS, 0.54x concurrency, ID 0x262F9751D333E0ED88C2CA4950B08D41 at byte 51260320
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.01
+# Time range: 2022-06-18 18:36:37 to 18:37:38
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count         10    6266
+# Exec time     12     33s   152us    72ms     5ms    15ms     5ms     3ms
+# Lock time     21   737ms    25us    14ms   117us   159us   570us    49us
+# Rows sent     39   7.73M       0   3.70k   1.26k   2.76k  847.02   1.09k
+# Rows examine  19   7.73M       0   3.70k   1.26k   2.76k  847.02   1.09k
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent    41 800.79M     349 388.32k 130.87k 283.86k  85.49k 117.95k
+# Query size     3   1.20M     201     201     201     201       0     201
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us  #########
+#   1ms  ################################################################
+#  10ms  ############
+# 100ms
+#    1s
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT `timestamp`, is_sitting, `condition`, message FROM `isu_condition` WHERE `jia_isu_uuid` = 'af7d7310-c397-4b63-b368-1c05941a562a'	AND `timestamp` < '2021-08-26 04:57:04'	ORDER BY `timestamp` DESC\G
+
+# Query 3: 46.18 QPS, 0.19x concurrency, ID 0xFFFCA4D67EA0A788813031B8BBC3B329 at byte 25369095
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.01
+# Time range: 2022-06-18 18:36:37 to 18:37:39
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          4    2863
+# Exec time      4     12s     7us   189ms     4ms    12ms     7ms     4ms
+# Lock time      0       0       0       0       0       0       0       0
+# Rows sent      0       0       0       0       0       0       0       0
+# Rows examine   0       0       0       0       0       0       0       0
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent     0  30.75k      11      11      11      11       0      11
+# Query size     0  16.78k       6       6       6       6       0       6
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us  #
+#  10us  ##############################################################
+# 100us  #######
+#   1ms  ################################################################
+#  10ms  ################
+# 100ms  #
+#    1s
+#  10s+
+COMMIT\G
+
+# Query 4: 22.77 QPS, 0.15x concurrency, ID 0x306EACB7457A8DA94B1E881668B28B13 at byte 49677497
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.01
+# Time range: 2022-06-18 18:36:38 to 18:37:39
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          2    1389
+# Exec time      3      9s     2ms    96ms     7ms    20ms     7ms     4ms
+# Lock time     57      2s   654us    19ms     1ms     4ms     2ms   881us
+# Rows sent      0       0       0       0       0       0       0       0
+# Rows examine   0       0       0       0       0       0       0       0
+# Rows affecte  99 199.31k     125     150  146.94  143.84    3.03  143.84
+# Bytes sent     0  74.17k      54      55   54.68   54.21    0.50   54.21
+# Query size    80  30.06M  18.13k  23.89k  22.16k  22.45k  803.32  21.38k
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us
+#   1ms  ################################################################
+#  10ms  #############
+# 100ms  #
+#    1s
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES ('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:15:12' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:16:11' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:17:10' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:18:19' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:19:19' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:20:13' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:21:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:22:14' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:23:14' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('ec26a304-d4cc-4876-bab0-15b18f5b1b08', '2021-08-28 15:24:19' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', 'この状況はさすがに無理です...'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:47:39' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:48:38' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:49:39' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:50:43' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:51:41' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:52:41' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:53:42' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:54:44' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:55:43' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('d67cdb17-5556-4e8c-8d88-e43bf0f2219c', '2021-08-28 14:56:37' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '直して掃除してほしいです..'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:30:45' , 1, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:31:42' , 1, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:32:39' , 1, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:33:40' , 1, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:34:39' , 1, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:35:41' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:36:39' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:37:48' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:38:40' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('3d9dbe2b-4eb2-440b-84ab-d7b07d62cd49', '2021-08-28 15:39:39' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:02:05' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:03:04' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:04:03' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:04:56' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:06:04' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:07:06' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:08:06' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:08:57' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:10:04' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('af7d7310-c397-4b63-b368-1c05941a562a', '2021-08-28 16:11:04' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', '汚れちゃった！'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:06:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:07:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:08:12' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:09:22' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:10:21' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:11:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:12:14' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:13:15' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:14:17' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('d858b2f6-117d-44c5-9475-d3c5287d3b51', '2021-08-28 16:15:14' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '早く改善してください。'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:06:58' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:07:56' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:08:53' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:10:00' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:11:01' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:11:54' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:13:01' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:13:57' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:15:00' , 0, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('c3ef1c89-cd91-4421-8a50-31b16ca35b54', '2021-08-28 16:15:56' , 1, 'is_dirty=true,is_overweight=false,is_broken=false', 'よごれたままなら暴れちゃうぞ！'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:37:26' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:38:24' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:39:25' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:40:28' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:41:24' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:42:27' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:43:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:44:28' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:45:28' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('13918bd5-6dc5-4397-aba7-6c79c031c84f', '2021-08-28 15:46:19' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れちゃったし重いかも〜'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:07:10' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:08:12' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:09:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:10:15' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:11:13' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:12:15' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:13:14' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:14:09' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:15:17' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('73f929be-caef-49fe-a5b1-6d7fa66b5496', '2021-08-28 16:16:19' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '座ってないで掃除して！'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:40:16' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:41:20' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:42:22' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:43:16' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:44:24' , 1, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:45:19' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:46:14' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:47:15' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:48:24' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('7134b76c-f78b-4164-9cc7-c2acceca1eaa', '2021-08-28 15:49:15' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:40:01' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:41:01' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:41:57' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:42:57' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:44:01' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:45:01' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:45:54' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:46:57' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:48:01' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9720c94b-f8cc-47a7-a007-69019998d426', '2021-08-28 15:48:51' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '改善していただけますでしょうか...'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:54:21' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:55:17' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:56:17' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:57:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:58:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 15:59:22' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 16:00:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 16:01:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 16:02:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('9a394e0b-a58e-40a9-a303-8864548dcb1f', '2021-08-28 16:03:12' , 1, 'is_dirty=true,is_overweight=true,is_broken=false', '汚れているし重たいです。'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:06:05' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:07:09' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:08:14' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:09:08' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:10:10' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:11:11' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:12:13' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:13:12' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:14:05' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('1849fc28-f172-4809-b9ec-f09d00f18488', '2021-08-28 15:15:06' , 0, 'is_dirty=false,is_overweight=false,is_broken=true', '壊れちゃいました〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 15:56:24' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 15:57:28' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 15:58:22' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 15:59:27' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:00:25' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:01:25' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:02:21' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:03:23' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:04:26' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('e70ff666-c13e-442e-a4ca-f00169824aad', '2021-08-28 16:05:23' , 1, 'is_dirty=false,is_overweight=false,is_broken=false', 'いい感じだよ〜'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:40:22' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:41:18' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:42:25' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:43:23' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:44:26' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:45:26' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:46:23' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:47:25' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:48:23' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('21c09c65-f99a-4722-9f66-5d9daf923679', '2021-08-28 15:49:26' , 0, 'is_dirty=true,is_overweight=false,is_broken=true', '汚れているし壊れています。'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 15:55:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 15:56:22' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 15:57:17' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 15:58:20' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 15:59:22' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 16:00:15' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 16:01:18' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 16:02:22' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 16:03:15' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！'),('5157a624-ac15-4b11-8252-0736f2805bc1', '2021-08-28 16:04:13' , 1, 'is_dirty=true,is_overweight=true,is_broken=true', '気がついたら全部ダメだった！')\G
