@@ -1,0 +1,125 @@
+
+# 24.6s user time, 120ms system time, 42.64M rss, 51.73M vsz
+# Current date: Sat Jun 18 23:07:55 2022
+# Hostname: isucon11q
+# Files: /var/log/mysql/mysql-slow.log
+# Overall: 152.22k total, 64 unique, 93.62 QPS, 0.44x concurrency ________
+# Time range: 2022-06-18 22:40:47 to 23:07:53
+# Attribute          total     min     max     avg     95%  stddev  median
+# ============     ======= ======= ======= ======= ======= ======= =======
+# Exec time           712s       0      1s     5ms     3ms    47ms    28us
+# Lock time             5s       0    17ms    30us    63us   185us       0
+# Rows sent        162.38M       0 137.58k   1.09k  592.07  11.33k    0.99
+# Rows examine     468.36M       0 412.84k   3.15k  592.07  34.67k       0
+# Rows affecte     272.75k       0     618    1.83       0   15.98       0
+# Bytes sent        14.91G       0  12.10M 102.72k  92.42k 1008.43k   62.76
+# Query size        59.53M       6 790.36k  410.05  192.76   4.31k   69.19
+# Boolean:
+# QC hit        49% yes,  50% no
+
+# Profile
+# Rank Query ID                            Response time  Calls  R/Call V/
+# ==== =================================== ============== ====== ====== ==
+#    1 0x7E41F4A94C0BFD09783D367F71226D62  650.9061 91.5%   1275 0.5105  0.04 SELECT isu isu_condition
+#    2 0x262F9751D333E0ED88C2CA4950B08D41   22.3228  3.1%  10557 0.0021  0.00 SELECT isu_condition
+#    3 0xFFFCA4D67EA0A788813031B8BBC3B329   14.3606  2.0%   7268 0.0020  0.03 COMMIT
+# MISC 0xMISC                               24.0489  3.4% 133118 0.0002   0.0 <61 ITEMS>
+
+# Query 1: 0.78 QPS, 0.40x concurrency, ID 0x7E41F4A94C0BFD09783D367F71226D62 at byte 98379344
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.04
+# Time range: 2022-06-18 22:40:47 to 23:07:53
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0    1275
+# Exec time     91    651s    57us      1s   511ms   580ms   147ms   526ms
+# Lock time      6   290ms       0    14ms   227us   445us   398us   167us
+# Rows sent     94 153.09M       0 137.58k 122.95k 136.54k  33.99k 130.04k
+# Rows examine  98 459.31M       0 412.84k 368.89k 399.43k 104.55k 399.43k
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent    90  13.49G     297  12.10M  10.83M  11.87M   2.95M  11.30M
+# Query size     0 237.82k     191     191     191     191       0     191
+# Boolean:
+# QC hit         5% yes,  94% no
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us  #
+# 100us  ###
+#   1ms  #
+#  10ms  #
+# 100ms  ################################################################
+#    1s  #
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu'\G
+#    SHOW CREATE TABLE `isucondition`.`isu`\G
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC\G
+
+# Query 2: 9.78 QPS, 0.02x concurrency, ID 0x262F9751D333E0ED88C2CA4950B08D41 at byte 98975289
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.00
+# Time range: 2022-06-18 22:44:06 to 23:02:06
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          6   10557
+# Exec time      3     22s   145us    34ms     2ms     5ms     2ms     2ms
+# Lock time     14   668ms    24us     6ms    63us    84us   144us    47us
+# Rows sent      4   7.60M       0   2.72k  754.85   1.78k  564.37  621.67
+# Rows examine   1   7.60M       0   2.72k  754.85   1.78k  564.37  621.67
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent     5 768.87M     349 283.10k  74.58k 182.98k  55.75k  62.55k
+# Query size     3   2.02M     201     201     201     201       0     201
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us  ########################
+#   1ms  ################################################################
+#  10ms  #
+# 100ms
+#    1s
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT `timestamp`, is_sitting, `condition`, message FROM `isu_condition` WHERE `jia_isu_uuid` = 'c6274418-6747-4ad2-a893-a733874e3f5f'	AND `timestamp` < '2021-08-30 06:09:00'	ORDER BY `timestamp` DESC\G
+
+# Query 3: 6.73 QPS, 0.01x concurrency, ID 0xFFFCA4D67EA0A788813031B8BBC3B329 at byte 77896087
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.03
+# Time range: 2022-06-18 22:44:06 to 23:02:06
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          4    7268
+# Exec time      2     14s     7us   499ms     2ms     8ms     8ms    31us
+# Lock time      0       0       0       0       0       0       0       0
+# Rows sent      0       0       0       0       0       0       0       0
+# Rows examine   0       0       0       0       0       0       0       0
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent     0  78.07k      11      11      11      11       0      11
+# Query size     0  42.59k       6       6       6       6       0       6
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us  #
+#  10us  ################################################################
+# 100us  ##########
+#   1ms  #############################
+#  10ms  #
+# 100ms  #
+#    1s
+#  10s+
+COMMIT\G

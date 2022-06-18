@@ -285,7 +285,7 @@ func main() {
 	}
 
 	s := gocron.NewScheduler(time.UTC)
-	s.Every(1).Second().Do(cacheTrend)
+	s.Every(5).Second().Do(cacheTrend)
 	s.StartAsync()
 	defer s.Stop()
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
