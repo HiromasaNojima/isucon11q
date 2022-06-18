@@ -284,8 +284,13 @@ func main() {
 		return
 	}
 
+	cacheTrendInterval, _ := strconv.Atoi(getEnv("CACHE_INTERVAL", "1"))
 	s := gocron.NewScheduler(time.UTC)
+<<<<<<< Updated upstream
 	s.Every(5).Second().Do(cacheTrend)
+=======
+	s.Every(cacheTrendInterval).Second().Do(cacheTrend)
+>>>>>>> Stashed changes
 	s.StartAsync()
 	defer s.Stop()
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
