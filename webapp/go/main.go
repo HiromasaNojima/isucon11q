@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-co-op/gocron"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -283,6 +284,10 @@ func main() {
 		return
 	}
 
+	s := gocron.NewScheduler(time.UTC)
+	s.Every(1).Second().Do(cacheTrend)
+	s.StartAsync()
+	defer s.Stop()
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
 	e.Logger.Fatal(e.Start(serverPort))
 }
@@ -1143,19 +1148,29 @@ type TrendConditions struct {
 	Critical []*TrendCondition
 }
 
+var trendCache = sync.Map{}
+
+func cacheTrend() {
+	isuList := []IsuWithCondition{}
+	err := db.Select(&isuList,
+		"SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC;",
+	)
+	if err != nil {
+		println(err)
+		return
+	}
+	trendCache.Store("trend", isuList)
+}
+
 // GET /api/trend
 // ISUの性格毎の最新のコンディション情報
 func getTrend(c echo.Context) error {
 	var err error
 	res := []TrendResponse{}
 
-	isuList := []IsuWithCondition{}
-	err = db.Select(&isuList,
-		"SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC;",
-	)
+	isuList, err := getCondition()
 	if err != nil {
-		//c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+		c.NoContent(http.StatusInternalServerError)
 	}
 
 	trends := map[string]TrendConditions{}
@@ -1205,6 +1220,23 @@ func getTrend(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func getCondition() ([]IsuWithCondition, error) {
+	v, ok := trendCache.Load("trend")
+	if !ok {
+		isuList := []IsuWithCondition{}
+		err := db.Select(&isuList,
+			"SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC;",
+		)
+		if err != nil {
+			//c.Logger().Errorf("db error: %v", err)
+			return nil, err
+		}
+		return isuList, nil
+	}
+
+	return v.([]IsuWithCondition), nil
 }
 
 var count int
