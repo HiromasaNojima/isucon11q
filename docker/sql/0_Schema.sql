@@ -12,11 +12,7 @@ CREATE TABLE `isu` (
   `jia_user_id` VARCHAR(255) NOT NULL,
   `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
   `updated_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-  PRIMARY KEY(`id`),
-  INDEX id_uuid(`id`, jia_isu_uuid),
-  INDEX id_uuid_char(`id`, jia_isu_uuid, `character`),
-  -- INDEX uuid(jia_isu_uuid),
-  INDEX `character`(`character`)
+   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
 CREATE TABLE `isu_condition` (
@@ -25,13 +21,10 @@ CREATE TABLE `isu_condition` (
   `timestamp` DATETIME NOT NULL,
   `is_sitting` TINYINT(1) NOT NULL,
   `condition` VARCHAR(255) NOT NULL,
-  `condition_level` CHAR(36) NOT NULL DEFAULT "warning",
   `message` VARCHAR(255) NOT NULL,
   `created_at` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY(`id`),
-  INDEX uuid(jia_isu_uuid),
-  INDEX getIsuConditions(jia_isu_uuid, `timestamp`, is_sitting, `condition`, message)
-  -- INDEX uuid_timestamp(jia_isu_uuid,`timestamp`)
+  INDEX uuid(jia_isu_uuid)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
 CREATE TABLE `user` (
