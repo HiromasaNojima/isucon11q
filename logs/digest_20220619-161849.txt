@@ -1,0 +1,61 @@
+
+# 21.4s user time, 110ms system time, 41.61M rss, 51.16M vsz
+# Current date: Sun Jun 19 16:19:11 2022
+# Hostname: isucon11q
+# Files: /var/log/mysql/mysql-slow.log
+# Overall: 129.55k total, 72 unique, 13.65 QPS, 0.16x concurrency ________
+# Time range: 2022-06-19 13:40:53 to 16:19:04
+# Attribute          total     min     max     avg     95%  stddev  median
+# ============     ======= ======= ======= ======= ======= ======= =======
+# Exec time          1477s       0      2s    11ms     3ms   112ms    23us
+# Lock time             5s       0    17ms    36us    89us   214us       0
+# Rows sent        326.74M       0 292.70k   2.58k   19.46  25.67k    0.99
+# Rows examine     968.48M       0 878.18k   7.66k   19.46  78.68k       0
+# Rows affecte     293.49k       0     618    2.32       0   14.64       0
+# Bytes sent        28.96G       0  25.86M 234.43k   2.76k   2.34M   62.76
+# Query size        61.23M       6 790.36k  495.65  487.09   3.76k   84.10
+# Boolean:
+# QC hit        53% yes,  46% no
+
+# Profile
+# Rank Query ID                            Response time   Calls  R/Call V
+# ==== =================================== =============== ====== ====== =
+#    1 0x7E41F4A94C0BFD09783D367F71226D62  1424.3144 96.4%   1187 1.1999  0.02 SELECT isu isu_condition
+# MISC 0xMISC                                52.7000  3.6% 128360 0.0004   0.0 <71 ITEMS>
+
+# Query 1: 0.13 QPS, 0.15x concurrency, ID 0x7E41F4A94C0BFD09783D367F71226D62 at byte 86487737
+# This item is included in the report because it matches --limit.
+# Scores: V/M = 0.02
+# Time range: 2022-06-19 13:40:56 to 16:19:04
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0    1187
+# Exec time     96   1424s   110us      2s      1s      1s   135ms      1s
+# Lock time      9   467ms       0     8ms   393us   690us   339us   332us
+# Rows sent     98 321.53M       0 292.70k 277.38k 270.35k  27.15k 270.35k
+# Rows examine  99 964.67M       0 878.18k 832.20k 830.38k  83.59k 830.38k
+# Rows affecte   0       0       0       0       0       0       0       0
+# Bytes sent    97  28.38G     297  25.86M  24.48M  24.67M   2.48M  24.67M
+# Query size     0 221.40k     191     191     191     191       0     191
+# Boolean:
+# QC hit         0% yes,  99% no
+# String:
+# Databases    isucondition
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us  #
+#   1ms  #
+#  10ms
+# 100ms  #
+#    1s  ################################################################
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu'\G
+#    SHOW CREATE TABLE `isucondition`.`isu`\G
+#    SHOW TABLE STATUS FROM `isucondition` LIKE 'isu_condition'\G
+#    SHOW CREATE TABLE `isucondition`.`isu_condition`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC\G
