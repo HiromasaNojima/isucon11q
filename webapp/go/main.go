@@ -1165,23 +1165,10 @@ func cacheTrend() {
 		"SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC;",
 	)
 	if err != nil {
-		println(err)
 		return
 	}
-	trendCache.Store("trend", isuList)
-}
 
-// GET /api/trend
-// ISUの性格毎の最新のコンディション情報
-func getTrend(c echo.Context) error {
-	var err error
 	res := []TrendResponse{}
-
-	isuList, err := getCondition()
-	if err != nil {
-		c.NoContent(http.StatusInternalServerError)
-	}
-
 	trends := map[string]TrendConditions{}
 	check := make(map[int]struct{})
 	for _, isu := range isuList {
@@ -1192,7 +1179,7 @@ func getTrend(c echo.Context) error {
 		conditionLevel, err := calculateConditionLevel(isu.Condition)
 		if err != nil {
 			//c.Logger().Error(err)
-			return c.NoContent(http.StatusInternalServerError)
+			return
 		}
 		trendCondition := TrendCondition{
 			ID:        isu.ID,
@@ -1228,12 +1215,74 @@ func getTrend(c echo.Context) error {
 			})
 	}
 
+	trendCache.Store("trend", res)
+}
+
+// GET /api/trend
+// ISUの性格毎の最新のコンディション情報
+func getTrend(c echo.Context) error {
+	//var err error
+
+	res, err := getCondition()
+	if err != nil {
+		c.NoContent(http.StatusInternalServerError)
+	}
+
+	//res := []TrendResponse{}
+	//trends := map[string]TrendConditions{}
+	//check := make(map[int]struct{})
+	//for _, isu := range isuList {
+	//	if _, ok := check[isu.ID]; ok {
+	//		continue
+	//	}
+	//	check[isu.ID] = struct{}{}
+	//	conditionLevel, err := calculateConditionLevel(isu.Condition)
+	//	if err != nil {
+	//		//c.Logger().Error(err)
+	//		return c.NoContent(http.StatusInternalServerError)
+	//	}
+	//	trendCondition := TrendCondition{
+	//		ID:        isu.ID,
+	//		Timestamp: isu.Timestamp.Unix(),
+	//	}
+	//
+	//	v, ok := trends[isu.Character]
+	//	if !ok {
+	//		v = TrendConditions{
+	//			Info:     []*TrendCondition{},
+	//			Warn:     []*TrendCondition{},
+	//			Critical: []*TrendCondition{},
+	//		}
+	//	}
+	//	switch conditionLevel {
+	//	case "info":
+	//		v.Info = append(v.Info, &trendCondition)
+	//	case "warning":
+	//		v.Warn = append(v.Warn, &trendCondition)
+	//	case "critical":
+	//		v.Critical = append(v.Critical, &trendCondition)
+	//	}
+	//	trends[isu.Character] = v
+	//}
+	//
+	//for cha, condition := range trends {
+	//	res = append(res,
+	//		TrendResponse{
+	//			Character: cha,
+	//			Info:      condition.Info,
+	//			Warning:   condition.Warn,
+	//			Critical:  condition.Critical,
+	//		})
+	//}
+
 	return c.JSON(http.StatusOK, res)
 }
 
-func getCondition() ([]IsuWithCondition, error) {
+func getCondition() ([]TrendResponse, error) {
 	v, ok := trendCache.Load("trend")
-	if !ok {
+	if ok {
+		return v.([]TrendResponse), nil
+	} else {
 		isuList := []IsuWithCondition{}
 		err := db.Select(&isuList,
 			"SELECT isu.id, isu.`character`, isu_condition.`condition`, isu_condition.`timestamp` FROM isu inner join isu_condition on isu.jia_isu_uuid = isu_condition.jia_isu_uuid ORDER BY timestamp DESC;",
@@ -1242,10 +1291,55 @@ func getCondition() ([]IsuWithCondition, error) {
 			//c.Logger().Errorf("db error: %v", err)
 			return nil, err
 		}
-		return isuList, nil
-	}
+		res := []TrendResponse{}
+		trends := map[string]TrendConditions{}
+		check := make(map[int]struct{})
+		for _, isu := range isuList {
+			if _, ok := check[isu.ID]; ok {
+				continue
+			}
+			check[isu.ID] = struct{}{}
+			conditionLevel, err := calculateConditionLevel(isu.Condition)
+			if err != nil {
+				//c.Logger().Error(err)
+				return nil, err
+			}
+			trendCondition := TrendCondition{
+				ID:        isu.ID,
+				Timestamp: isu.Timestamp.Unix(),
+			}
 
-	return v.([]IsuWithCondition), nil
+			v, ok := trends[isu.Character]
+			if !ok {
+				v = TrendConditions{
+					Info:     []*TrendCondition{},
+					Warn:     []*TrendCondition{},
+					Critical: []*TrendCondition{},
+				}
+			}
+			switch conditionLevel {
+			case "info":
+				v.Info = append(v.Info, &trendCondition)
+			case "warning":
+				v.Warn = append(v.Warn, &trendCondition)
+			case "critical":
+				v.Critical = append(v.Critical, &trendCondition)
+			}
+			trends[isu.Character] = v
+		}
+
+		for cha, condition := range trends {
+			res = append(res,
+				TrendResponse{
+					Character: cha,
+					Info:      condition.Info,
+					Warning:   condition.Warn,
+					Critical:  condition.Critical,
+				})
+		}
+		trendCache.Store("trend", res)
+		return res, nil
+	}
 }
 
 var count int
