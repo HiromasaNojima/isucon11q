@@ -1265,7 +1265,7 @@ func worker(reqs <-chan []IsuCondition) {
 			continue
 		}
 
-		_, err = tx.NamedExec("INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES (:jia_isu_uuid, :timestamp , :is_sitting, :condition, :message)", pool)
+		_, err = tx.NamedExec("INSERT INTO `isu_condition`(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`) VALUES (:jia_isu_uuid, :timestamp , :is_sitting, :condition, :message, :condition_level)", pool)
 		if err != nil {
 			//println("db error: %v", err)
 			continue
