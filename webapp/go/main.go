@@ -271,11 +271,7 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
-	workerSize, _ := strconv.Atoi(os.Getenv("WORKER_THREAD_SIZE"))
-	for i := 0; i < workerSize; i++ {
-		//for i := 0; i < 1; i++ {
-		go worker(queue)
-	}
+	go worker(queue)
 	defer close(queue)
 
 	postIsuConditionTargetBaseURL = getEnv("POST_ISUCONDITION_TARGET_BASE_URL", "https://isucondition-1.t.isucon.dev")
